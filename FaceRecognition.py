@@ -37,13 +37,38 @@ def retrieveFaces():
  """
 
 
-#Sets up / connects to local DB
+
+
+
+
+
+# Sets up / connects to local DB
 cursor, connection = localDataFuntions.localDatabaseConnect()
 
 
 # For current version, this pulls the video from the webcam. "To open default camera using default backend just pass 0"
 video_capture = cv2.VideoCapture(0)
 
+
+
+#Only gets the jpeg files
+files = [file for file in os.listdir("Faces/") if file.endswith(('.jpeg', '.jpg'))]
+faceImages = [None] * len(files)
+known_face_encodings = [None] * len(files)
+known_face_names = [os.path.splitext(file)[0] for file in files]
+
+
+# Create arrays of known face encodings and their names.
+i = 0
+while i < len(files):
+    faceImages[i] = face_recognition.load_image_file("Faces/" + files[i])
+    known_face_encodings[i] = face_recognition.face_encodings(faceImages[i])[0]
+    i = i + 1
+
+
+
+"""
+OLD NOT YET REMOVED FOR REFERENCE
 # Import a facial image and learn to identify it.
 connor_image = face_recognition.load_image_file("Faces/Connor1.jpg")
 connor_face_encoding = face_recognition.face_encodings(connor_image)[0]
@@ -55,7 +80,7 @@ known_face_encodings = [
 known_face_names = [
     "Connor M"
 ]
-
+"""
 
 
 
@@ -120,7 +145,9 @@ while True:
         font = cv2.FONT_HERSHEY_DUPLEX
         cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
         
-        localDataFuntions.updateLocalDatabase(cursor,connection,name)
+        #Saves names and timestamps to the local SQLite Database
+        localDataFuntions.updateLocalDatabase(cursor,connection,name, frame)
+        #i added frame
 
         """
         #UPDATE: TO SEND PUSH NOTIFICATIONS IN FUTURE UPDATE

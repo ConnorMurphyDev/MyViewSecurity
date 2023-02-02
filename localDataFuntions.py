@@ -2,7 +2,11 @@ import os.path
 import sqlite3
 from datetime import datetime
 
+import time
 
+import cv2
+
+last_checked = {}
 
 def localDatabaseConnect():
 
@@ -23,18 +27,59 @@ def localDatabaseConnect():
         cursor = connection.cursor()
 
         #Creates log table
-        cursor.execute("create table log (name text, time text, cameraName text)")
+        cursor.execute("create table log (name text, time text, cameraName text, image BLOB)")
         return cursor, connection
 
 
+def updateLocalDatabase(cursor, connection, name, frame):
+
+    if check_condition(name):
+        now = datetime.now()
+        dt_string = now.strftime("%d/%m/%Y %I:%M:%S %p")
+        #Files cannot be saved with these characters
+        viableFileName = dt_string.replace("/", "-").replace(":", "-") 
+        print("date and time =", dt_string)
+
+        #Images of people spotted on the security camera are captured and saved as a hash of its datetime
+        cv2.imwrite("FacesCaptured/" + viableFileName + ".jpg", frame)
+
+        # Read the image file into memory as binary data
+        with open("FacesCaptured/" + viableFileName + ".jpg", "rb") as f:
+            image_data = f.read()
 
 
-def updateLocalDatabase(cursor, connection, name):
+        cursor.execute("insert into log values(?,?,?,?)",(name,dt_string,"Webcam",image_data))
+        connection.commit()
+"""
+def updateLocalDatabase(cursor, connection, name, frame):
 
-    now = datetime.now()
-    dt_string = now.strftime("%d/%m/%Y %I:%M:%S %p")
-    print("date and time =", dt_string)
+    if check_condition(name):
+        now = datetime.now()
+        dt_string = now.strftime("%d/%m/%Y %I:%M:%S %p")
+        hashName = str(hash(dt_string))
+        print("date and time =", dt_string)
+
+        #Images of people spotted on the security camera are captured and saved as a hash of its datetime
+        cv2.imwrite("FacesCaptured/" + hashName + ".jpg", frame)
+
+        # Read the image file into memory as binary data
+        with open("FacesCaptured/" + hashName + ".jpg", "rb") as f:
+            image_data = f.read()
 
 
-    cursor.execute("insert into log values(?,?,?)",(name,dt_string,"Webcam"))
-    connection.commit()
+        cursor.execute("insert into log values(?,?,?,?,?)",(name,dt_string,"Webcam",image_data,hashName))
+        connection.commit()
+"""
+    
+
+
+# Condition check, only adds name to database if it hasnt already in the last 10 seconds
+def check_condition(string):
+    global last_checked
+
+    
+    if string not in last_checked or time.time() - last_checked[string] > 10:
+        last_checked[string] = time.time()
+        return True
+    else:
+        return False
