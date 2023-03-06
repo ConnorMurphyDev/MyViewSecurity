@@ -1,8 +1,11 @@
+#Inactive, kept for reference for future updates.
+#Example of pushing notifications to phones
+
 from pushbullet import Pushbullet
 import datetime
 from datetime import timedelta
 
-API_KEY = "o.PJ7dJ6coH87Bdo9ronFTuFnu7D9go0Yj"
+API_KEY = "UNKOWN"
 
 def pushToPhone(name):
         

@@ -1,3 +1,7 @@
+#Currently kept for notes and reference on SQLite syntax
+#Will be removed
+
+
 import sqlite3
 
 connection = sqlite3.connect("securityLog.db")

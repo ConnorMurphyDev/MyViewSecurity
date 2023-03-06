@@ -1,0 +1,5 @@
+    Current Bug: If a specific date is selected to be displayed in the table, then the display all button is clicked
+followed by the same date. It will not update back to that date. Another date must be selected first before the intial date
+will be loaded again.
+
+Current Bug: The record button must be clicked twice the first time its used
